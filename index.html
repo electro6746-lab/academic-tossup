@@ -94,6 +94,20 @@
     }
 
     .question-area { min-height: 362px; padding: 30px clamp(20px, 5vw, 44px) 25px; }
+    .countdown-track {
+      height: 4px;
+      margin: -10px 0 24px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 10%);
+    }
+    .countdown-track[hidden] { display: none; }
+    .countdown-bar { width: 100%; height: 100%; background: var(--gold); }
+    .countdown-bar.running { animation: answer-countdown 10s linear forwards; }
+    @keyframes answer-countdown {
+      from { width: 100%; }
+      to { width: 0; }
+    }
     .question-meta { display: flex; align-items: center; gap: 9px; margin-bottom: 24px; }
     .category-pill {
       padding: 6px 10px;
@@ -282,6 +296,9 @@
             </label>
           </div>
           <div class="question-area" aria-live="polite">
+            <div class="countdown-track" id="countdown-track" hidden aria-hidden="true">
+              <div class="countdown-bar" id="countdown-bar"></div>
+            </div>
             <div class="question-meta">
               <span class="category-pill" id="category-pill">Mixed subjects</span>
               <span class="clue-count" id="clue-count">Read-aloud toss-up</span>
@@ -324,7 +341,7 @@
             <ol class="instructions">
               <li><span class="step-number">01</span><span>Words appear at a reading pace, from precise opening detail to giveaway.</span></li>
               <li><span class="step-number">02</span><span>Buzz with the button or Spacebar, then type your answer.</span></li>
-              <li><span class="step-number">03</span><span>Correct answers earn 10 points. A wrong buzz resumes the question.</span></li>
+              <li><span class="step-number">03</span><span>Correct answers earn 10 points. A wrong buzz resumes the question; after the full toss-up, you have 10 seconds to buzz before the answer is revealed for 0 points.</span></li>
               <li><span class="step-number">04</span><span>⚡ marks each buzz point in the full question; green is correct and red is missed.</span></li>
               <li><span class="step-number">05</span><span>Skip any active toss-up to reveal the full question and answer without points.</span></li>
             </ol>
@@ -404,6 +421,8 @@
       clueCount: document.querySelector("#clue-count"),
       clueList: document.querySelector("#clue-list"),
       answerBox: document.querySelector("#answer-box"),
+      countdownTrack: document.querySelector("#countdown-track"),
+      countdownBar: document.querySelector("#countdown-bar"),
       roundLabel: document.querySelector("#round-label"),
       statusDot: document.querySelector("#status-dot"),
       statusText: document.querySelector("#status-text"),
@@ -424,6 +443,7 @@
     let buzzes = [];
     let questionComplete = false;
     let revealTimer = null;
+    let answerTimer = null;
     let state = "idle";
     let playedIds = new Set();
     let score = 0;
@@ -442,6 +462,33 @@
     function setStatus(message, tone = "") {
       elements.statusText.textContent = message;
       elements.statusDot.className = `status-dot${tone ? ` ${tone}` : ""}`;
+    }
+
+    function cancelAnswerCountdown() {
+      clearTimeout(answerTimer);
+      answerTimer = null;
+      elements.countdownBar.classList.remove("running");
+      elements.countdownTrack.hidden = true;
+    }
+
+    function startAnswerCountdown() {
+      cancelAnswerCountdown();
+      elements.countdownTrack.hidden = false;
+      elements.countdownBar.classList.add("running");
+      answerTimer = setTimeout(() => {
+        answerTimer = null;
+        if (state !== "complete") return;
+        finishRound(false);
+        setStatus("Time ran out. You earned 0 points. The answer is shown above.");
+      }, 10000);
+    }
+
+    function completeQuestion() {
+      questionComplete = true;
+      state = "complete";
+      updateControls();
+      startAnswerCountdown();
+      setStatus("The whole toss-up is on screen. Buzz in within 10 seconds or the answer will be revealed.", "ready");
     }
 
     function renderQuestion() {
@@ -512,6 +559,7 @@
       buzzes = [];
       questionComplete = false;
       clearTimeout(revealTimer);
+      cancelAnswerCountdown();
       state = "reading";
       elements.roundLabel.textContent = `Toss-up ${questionNumber}`;
       elements.categoryPill.textContent = activeQuestion.category;
@@ -528,10 +576,7 @@
     function revealNextWord() {
       if (state !== "reading") return;
       if (revealedWords >= questionWords.length) {
-        questionComplete = true;
-        state = "complete";
-        updateControls();
-        setStatus("The whole toss-up is on screen. Buzz in or reveal the answer.", "ready");
+        completeQuestion();
         return;
       }
 
@@ -539,10 +584,7 @@
       revealedWords += 1;
       renderQuestion();
       if (revealedWords >= questionWords.length) {
-        questionComplete = true;
-        state = "complete";
-        updateControls();
-        setStatus("The whole toss-up is on screen. Buzz in or reveal the answer.", "ready");
+        completeQuestion();
         return;
       }
 
@@ -553,6 +595,7 @@
     function buzzIn() {
       if (state !== "reading" && state !== "complete") return;
       clearTimeout(revealTimer);
+      cancelAnswerCountdown();
       buzzes.push({ wordIndex: revealedWords, result: "" });
       state = "buzzed";
       renderQuestion();
@@ -588,6 +631,7 @@
 
     function finishRound(wasCorrect, revealAnswer = true) {
       clearTimeout(revealTimer);
+      cancelAnswerCountdown();
       questionComplete = true;
       if (revealAnswer) {
         revealedWords = questionWords.length;
@@ -643,6 +687,7 @@
 
     function resetScore() {
       clearTimeout(revealTimer);
+      cancelAnswerCountdown();
       score = 0;
       correctCount = 0;
       playedCount = 0;
