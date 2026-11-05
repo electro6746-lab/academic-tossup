@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a30">
+  <title>Quickstudy — Academic Toss-Ups</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f3f5fa;
+      --muted: #9da9bd;
+      --bg: #101a30;
+      --panel: #18243b;
+      --panel-light: #202e49;
+      --line: #303c53;
+      --gold: #f1bd62;
+      --green: #92d6b4;
+      --red: #f19999;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 18% 0%, rgb(44 71 113 / 32%), transparent 36rem),
+        var(--bg);
+    }
+
+    button, select { font: inherit; }
+    button { color: inherit; }
+
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 88px;
+      border-bottom: 1px solid rgb(255 255 255 / 9%);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border: 1px solid rgb(241 189 98 / 45%);
+      border-radius: 12px;
+      color: var(--gold);
+      background: rgb(241 189 98 / 10%);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-name { font-size: 16px; font-weight: 750; letter-spacing: -.03em; }
+    .brand-note { margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .header-tag { color: var(--muted); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+
+    main { padding: 46px 0 52px; }
+    .intro { margin-bottom: 26px; }
+    .eyebrow { color: var(--gold); font-size: 11px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 9px 0 8px; font-size: clamp(30px, 5vw, 46px); letter-spacing: -.055em; line-height: 1.08; }
+    .intro p { max-width: 620px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 20px; align-items: start; }
+    .card, .sidebar-card { border: 1px solid var(--line); border-radius: 18px; background: rgb(24 36 59 / 92%); }
+    .game-card { overflow: hidden; }
+    .game-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 72px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .round-label { color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .category-select {
+      min-height: 38px;
+      padding: 0 34px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--ink);
+      background: var(--panel-light);
+      cursor: pointer;
+    }
+
+    .question-area { min-height: 362px; padding: 30px clamp(20px, 5vw, 44px) 25px; }
+    .question-meta { display: flex; align-items: center; gap: 9px; margin-bottom: 24px; }
+    .category-pill {
+      padding: 6px 10px;
+      border: 1px solid rgb(241 189 98 / 28%);
+      border-radius: 999px;
+      color: var(--gold);
+      background: rgb(241 189 98 / 8%);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .clue-count { color: var(--muted); font-size: 12px; }
+    .clue-list { display: grid; gap: 13px; min-height: 164px; align-content: start; }
+    .clue {
+      color: var(--ink);
+      font-size: clamp(16px, 2vw, 19px);
+      line-height: 1.58;
+    }
+
+    .new-word {
+      animation: word-fade-in .22s ease-out both;
+    }
+
+    .buzz-marker {
+      display: inline-block;
+      margin: 0 3px;
+      color: var(--gold);
+      font-size: .82em;
+      font-weight: 800;
+      line-height: 1;
+      vertical-align: .08em;
+    }
+
+    .buzz-marker.correct { color: var(--green); }
+    .buzz-marker.missed { color: var(--red); }
+    .buzz-marker.skipped { color: var(--muted); }
+
+    .placeholder { color: #78869d; font-size: 15px; line-height: 1.7; }
+    @keyframes word-fade-in {
+      from { opacity: 0; transform: translateY(2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .answer-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border: 1px solid rgb(146 214 180 / 27%);
+      border-radius: 11px;
+      background: rgb(146 214 180 / 7%);
+    }
+    .answer-label { margin-bottom: 5px; color: var(--green); font-size: 10px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    .answer-text { font-size: 16px; font-weight: 700; }
+
+    .game-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 17px 22px;
+      border-top: 1px solid var(--line);
+      background: rgb(12 20 36 / 40%);
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 43px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-light);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+
+    .button[hidden] { display: none; }
+    .button:hover:not(:disabled) { transform: translateY(-1px); border-color: #667995; }
+    .button:focus-visible, select:focus-visible { outline: 3px solid rgb(241 189 98 / 60%); outline-offset: 2px; }
+    .button:disabled { opacity: .43; cursor: not-allowed; }
+    .button.primary { border-color: var(--gold); color: #1b2030; background: var(--gold); }
+    .button.buzz { min-width: 148px; border-color: #e6a99b; color: #fff3ef; background: #a74648; }
+    .button.buzz:hover:not(:disabled) { border-color: #ffc2b3; background: #bd5253; }
+    .button.correct { border-color: #74ba98; color: #d7f4e4; background: #244b3c; }
+    .button.subtle { background: transparent; }
+    .key-hint { color: rgb(255 255 255 / 68%); font-size: 10px; font-weight: 600; }
+    #answer-form { display: flex; flex: 1 1 100%; gap: 9px; }
+    #answer-form[hidden] { display: none; }
+    .answer-input {
+      min-width: 0;
+      min-height: 43px;
+      flex: 1;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      background: var(--bg);
+      font: inherit;
+      font-size: 14px;
+    }
+    .answer-input:focus-visible { outline: 3px solid rgb(241 189 98 / 60%); outline-offset: 2px; }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 22px 15px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .status-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #77869e; }
+    .status-dot.ready { background: var(--gold); box-shadow: 0 0 10px rgb(241 189 98 / 52%); }
+    .status-dot.buzzed { background: #f16f70; box-shadow: 0 0 10px rgb(241 111 112 / 45%); }
+    .status-dot.done { background: var(--green); }
+
+    .sidebar { display: grid; gap: 14px; }
+    .sidebar-card { padding: 19px; }
+    .side-heading { margin: 0 0 15px; font-size: 13px; font-weight: 750; }
+    .score-main { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid var(--line); }
+    .score-number { font-size: 38px; font-weight: 750; letter-spacing: -.06em; }
+    .score-caption { color: var(--muted); font-size: 12px; }
+    .score-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 14px; }
+    .stat-value { display: block; font-size: 18px; font-weight: 700; }
+    .stat-label { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .instructions { margin: 0; padding: 0; list-style: none; }
+    .instructions li { display: flex; gap: 9px; margin: 11px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .step-number { color: var(--gold); font-weight: 750; }
+    .reset-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .reset-row span { color: var(--muted); font-size: 11px; }
+    .small-button { min-height: 34px; padding: 0 10px; font-size: 11px; }
+    footer { padding: 16px 0 24px; color: #77869e; font-size: 11px; line-height: 1.6; }
+
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 28px, 560px); }
+      header { min-height: 72px; }
+      .header-tag { font-size: 10px; }
+      main { padding-top: 32px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: 1fr 1fr; }
+      .sidebar-card { padding: 16px; }
+      .question-area { min-height: 340px; padding-top: 24px; }
+      .game-controls { padding: 15px; }
+      .game-top { padding: 14px 16px; }
+    }
+
+    @media (max-width: 450px) {
+      .sidebar { grid-template-columns: 1fr; }
+      .game-controls .button { flex: 1 1 auto; }
+      .button.buzz { flex-basis: 100%; }
+      .header-tag { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand" aria-label="Quickstudy Academic Toss-Ups">
+        <div class="brand-mark" aria-hidden="true">Q</div>
+        <div>
+          <div class="brand-name">quickstudy</div>
+          <div class="brand-note">Academic toss-ups</div>
+        </div>
+      </div>
+      <div class="header-tag">Read · Think · Buzz</div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="eyebrow">Solo practice</div>
+        <h1>Know it? Buzz in.</h1>
+        <p>Work through original academic toss-ups revealed word by word, from precise opening detail to a final giveaway. Buzz when you know the answer and type it to check your score.</p>
+      </section>
+
+      <div class="layout">
+        <section class="card game-card" aria-label="Toss-up game">
+          <div class="game-top">
+            <div class="round-label" id="round-label">Ready when you are</div>
+            <label>
+              <span class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Question category</span>
+              <select class="category-select" id="category-select" aria-label="Question category">
+                <option value="All">All categories</option>
+              </select>
+            </label>
+          </div>
+          <div class="question-area" aria-live="polite">
+            <div class="question-meta">
+              <span class="category-pill" id="category-pill">Mixed subjects</span>
+              <span class="clue-count" id="clue-count">Read-aloud toss-up</span>
+            </div>
+            <div class="clue-list" id="clue-list">
+              <div class="placeholder">The question appears word by word, at a live reader’s pace. Buzz at any time and type your answer to check it. Press “Start toss-up” when you’re ready.</div>
+            </div>
+            <div id="answer-box" hidden></div>
+          </div>
+          <div class="game-controls">
+            <button class="button primary" id="start-button" type="button">Start toss-up <span class="key-hint">N</span></button>
+            <button class="button buzz" id="buzz-button" type="button" disabled>Buzz in <span class="key-hint">SPACE</span></button>
+            <form id="answer-form" hidden>
+              <label for="answer-input" class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Type your answer</label>
+              <input class="answer-input" id="answer-input" type="text" autocomplete="off" placeholder="Type your answer…" required>
+              <button class="button primary" type="submit">Submit answer <span class="key-hint">ENTER</span></button>
+            </form>
+            <button class="button subtle" id="skip-button" type="button" hidden>Skip · reveal answer</button>
+          </div>
+          <div class="status-row" role="status" aria-live="polite">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Choose a category and start a round.</span>
+          </div>
+        </section>
+
+        <aside class="sidebar" aria-label="Game information">
+          <section class="sidebar-card">
+            <h2 class="side-heading">Your session</h2>
+            <div class="score-main">
+              <div><span class="score-number" id="score">0</span><div class="score-caption">points</div></div>
+              <div style="text-align:right"><span class="score-number" id="accuracy" style="font-size:25px">—</span><div class="score-caption">accuracy</div></div>
+            </div>
+            <div class="score-stats">
+              <div><span class="stat-value" id="correct-count">0</span><span class="stat-label">Correct</span></div>
+              <div><span class="stat-value" id="played-count">0</span><span class="stat-label">Played</span></div>
+            </div>
+          </section>
+          <section class="sidebar-card">
+            <h2 class="side-heading">How to play</h2>
+            <ol class="instructions">
+              <li><span class="step-number">01</span><span>Words appear at a reading pace, from precise opening detail to giveaway.</span></li>
+              <li><span class="step-number">02</span><span>Buzz with the button or Spacebar, then type your answer.</span></li>
+              <li><span class="step-number">03</span><span>Correct answers earn 10 points. A wrong buzz resumes the question.</span></li>
+              <li><span class="step-number">04</span><span>⚡ marks each buzz point in the full question; green is correct and red is missed.</span></li>
+              <li><span class="step-number">05</span><span>Skip any active toss-up to reveal the full question and answer without points.</span></li>
+            </ol>
+          </section>
+          <div class="reset-row">
+            <span>Score stays on this device only.</span>
+            <button class="button subtle small-button" id="reset-button" type="button">Reset score</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <footer>Questions are original practice material. Academic subjects and formats are for independent study.</footer>
+  </div>
+
+  <script>
+    const questions = [
+      { category: "Science", clues: ["In a 1808 work, this English chemist argued that each element consists of atoms with a characteristic mass, and that compounds form when atoms combine in fixed whole-number ratios.", "His model treated atoms as indivisible particles and helped account for the laws of conservation of mass and definite proportions.", "For 10 points, name this chemist whose atomic theory helped explain the laws of multiple proportions."], answer: "John Dalton", aliases: ["John", "Dalton"] },
+      { category: "Science", clues: ["Inside the cells of plants and algae, this double-membraned organelle contains an internal system of flattened sacs called thylakoids, often stacked into grana.", "Its pigment chlorophyll absorbs light, and its thylakoid membranes host the light-dependent reactions that produce ATP and NADPH.", "For 10 points, name this organelle where photosynthesis takes place."], answer: "Chloroplast" },
+      { category: "Science", clues: ["When the magnetic flux through a conducting loop changes, the resulting induced current creates its own magnetic field that resists that change.", "This rule gives the direction of induced current and explains why electromagnetic induction conserves energy.", "For 10 points, name this law represented by the negative sign in Faraday's law."], answer: "Lenz's law", aliases: ["Lenz"] },
+      { category: "Science", clues: ["In aqueous chemistry, this quantity is defined as the negative base-ten logarithm of the hydrogen-ion activity, so it compresses a wide range of concentrations into a convenient scale.", "Because the scale is logarithmic, a one-unit decrease corresponds to a tenfold increase in hydrogen-ion concentration.", "For 10 points, name this scale on which a neutral solution is about 7."], answer: "pH scale", aliases: ["pH"] },
+      { category: "Science", clues: ["Using a torsion balance, this English scientist measured the tiny gravitational attraction between lead spheres in a laboratory, allowing the gravitational constant to be estimated.", "His experiment demonstrated that the force of gravity could be measured between ordinary objects on Earth.", "For 10 points, name this scientist whose experiment is often described as 'weighing the Earth.'"], answer: "Henry Cavendish", aliases: ["Henry", "Cavendish"] },
+      { category: "Science", clues: ["This enzyme synthesizes a DNA strand using an RNA template, carrying out the reverse of the usual flow of genetic information.", "It is essential to retroviruses, whose genomes are RNA but must be copied into DNA to integrate into a host cell's chromosomes.", "For 10 points, name this enzyme used by HIV to copy its RNA genome."], answer: "Reverse transcriptase", aliases: ["Reverse transcriptase enzyme"] },
+      { category: "Science", clues: ["In this model of Earth's outer shell, rigid sections of lithosphere move over the softer asthenosphere and interact at their boundaries.", "Evidence for it includes seafloor spreading, matching fossils on separated continents, and the pattern of earthquakes and volcanoes.", "For 10 points, name this theory describing the movement of Earth's lithospheric plates."], answer: "Plate tectonics", aliases: ["Plate tectonic theory"] },
+      { category: "Science", clues: ["This quantum-mechanical rule forbids two identical fermions in the same system from occupying an identical quantum state.", "It explains why electrons in an atom fill different orbitals and helps account for the structure of the periodic table.", "For 10 points, name this exclusion principle named for Austrian physicist Wolfgang."], answer: "Pauli exclusion principle", aliases: ["Pauli principle", "Pauli exclusion"] },
+      { category: "Literature", clues: ["In this novella, a frame narrator travels through a snowbound New England town and pieces together the story of a taciturn farmer from a local storyteller.", "The farmer's marriage to the hypochondriac Zeena and his love for her cousin Mattie Silver lead to a desperate sledding accident.", "For 10 points, name this Edith Wharton novella set in Starkfield, whose title character is Ethan."], answer: "Ethan Frome" },
+      { category: "Literature", clues: ["In one poem by this writer, a bird drinks dew from a convenient grass blade and moves aside for a beetle; many of her poems use slant rhyme and dashes.", "She spent much of her life in Amherst, Massachusetts, and wrote about death, nature, and immortality in short lyric poems.", "For 10 points, name this poet of 'Because I could not stop for Death' and 'Hope is the thing with feathers.'"], answer: "Emily Dickinson", aliases: ["Emily", "Dickinson"] },
+      { category: "Literature", clues: ["In this Greek epic, its hero visits the underworld, escapes the witch Circe, and has himself bound to his ship's mast to hear the Sirens without being lured to his death.", "After a long journey following the Trojan War, he returns in disguise to his home, where suitors have been courting his wife Penelope.", "For 10 points, name this Homeric epic about the journey of Odysseus back to Ithaca."], answer: "The Odyssey", aliases: ["Odyssey"] },
+      { category: "Literature", clues: ["In this novella, a traveling salesman wakes to discover that he has transformed into a gigantic insect-like creature.", "His family initially tries to care for him, but his condition isolates him and threatens their financial stability.", "For 10 points, name this Franz Kafka work about Gregor Samsa."], answer: "The Metamorphosis", aliases: ["Metamorphosis"] },
+      { category: "Literature", clues: ["This novel's protagonist, Okonkwo, is a respected wrestler and farmer in the Igbo village of Umuofia.", "Its final section depicts the disruption of Igbo society by British colonial rule and Christian missionaries.", "For 10 points, name this Chinua Achebe novel whose title describes the collapse of a society."], answer: "Things Fall Apart" },
+      { category: "Literature", clues: ["This poem's speaker describes a widening gyre, a falcon that cannot hear its falconer, and a rough beast moving toward Bethlehem.", "Written by an Irish poet in the aftermath of World War I, it presents a vision of social upheaval and a new historical era.", "For 10 points, name this poem by W. B. Yeats."], answer: "The Second Coming", aliases: ["Second Coming"] },
+      { category: "History", clues: ["Signed in 1648, this collection of agreements concluded the Thirty Years' War in the Holy Roman Empire and the Eighty Years' War between Spain and the Dutch Republic.", "It affirmed the independence of the Dutch Republic and is often associated with the development of state sovereignty in Europe.", "For 10 points, name this peace settlement negotiated in the Westphalian cities of Münster and Osnabrück."], answer: "Peace of Westphalia", aliases: ["Westphalia"] },
+      { category: "History", clues: ["This pharaoh moved Egypt's capital to a new city called Akhetaten and sponsored religious reforms centered on the solar disk Aten.", "His wife Nefertiti appears prominently in art from the Amarna period, and his religious changes were later reversed by his successors.", "For 10 points, name this pharaoh originally called Amenhotep IV, sometimes known as the 'heretic king.'"], answer: "Akhenaten" },
+      { category: "History", clues: ["In 1898, British and Egyptian forces armed with Maxim guns and rifles defeated a much larger Mahdist army near the confluence of the Blue and White Nile.", "The victory, led by Herbert Kitchener, secured British control of Sudan and was followed by the Fashoda Incident.", "For 10 points, name this decisive battle fought near the Sudanese capital of Khartoum."], answer: "Battle of Omdurman", aliases: ["Omdurman"] },
+      { category: "History", clues: ["In 1066, an invading army crossed the English Channel after a disputed succession to the throne of Edward the Confessor.", "King Harold Godwinson was killed during the battle, and the victorious duke later became king of England.", "For 10 points, name this battle in which William the Conqueror defeated the English near Hastings."], answer: "Battle of Hastings", aliases: ["Hastings"] },
+      { category: "History", clues: ["Beginning in 1791, enslaved people in the French colony of Saint-Domingue revolted against slavery and colonial rule.", "Leaders including Toussaint Louverture helped drive the conflict that resulted in the establishment of an independent state in 1804.", "For 10 points, name this revolution that created the first independent Black republic, Haiti."], answer: "Haitian Revolution", aliases: ["Haiti revolution"] },
+      { category: "History", clues: ["This 1814–1815 diplomatic gathering sought to restore political stability in Europe after the defeat of Napoleon.", "Its leading representatives included Austria's Klemens von Metternich, and it redrew borders while restoring several monarchies.", "For 10 points, name this congress held in the Austrian capital."], answer: "Congress of Vienna", aliases: ["Vienna Congress"] },
+      { category: "Mathematics", clues: ["For a convex polyhedron, this relation connects the number of vertices V, edges E, and faces F, regardless of the exact shape of the solid.", "It can be written V − E + F = 2 and is an early example of a topological invariant.", "For 10 points, name this formula named for the Swiss mathematician who also studied graph theory and mechanics."], answer: "Euler's polyhedron formula", aliases: ["Euler's formula", "Euler formula"] },
+      { category: "Mathematics", clues: ["This irrational constant can be defined as the limit of (1 + 1/n) to the nth power as n grows without bound, and it appears naturally in continuous growth.", "It is the base of the natural logarithm and of the exponential function, whose derivative is itself.", "For 10 points, name this approximately 2.718 constant denoted by the letter e."], answer: "Euler's number (e)", aliases: ["e", "Euler's number", "Euler number"] },
+      { category: "Mathematics", clues: ["For a function with a continuous derivative, this result equates the definite integral of that derivative over an interval with the change in the original function at the interval's endpoints.", "It establishes the inverse relationship between differentiation and integration and has two commonly stated parts.", "For 10 points, name this theorem of calculus."], answer: "Fundamental theorem of calculus", aliases: ["FTC"] },
+      { category: "Mathematics", clues: ["In this triangular arrangement, each interior number is the sum of the two numbers directly above it, and the rows begin with 1.", "Its entries give the binomial coefficients and can be used to expand powers of a binomial.", "For 10 points, name this number triangle named for a French mathematician."], answer: "Pascal's triangle", aliases: ["Pascal triangle"] },
+      { category: "Mathematics", clues: ["For a right triangle, this relation says that the square of the hypotenuse equals the sum of the squares of the other two sides.", "It is often written a² + b² = c² and can be proved using similar triangles or area rearrangements.", "For 10 points, name this theorem commonly associated with the ancient Greek mathematician of Samos."], answer: "Pythagorean theorem", aliases: ["Pythagoras theorem"] },
+      { category: "Geography", clues: ["Rising in Germany's Black Forest, this river flows eastward through Central Europe and forms parts of several national borders before entering the Black Sea.", "Its extensive delta, shared by Romania and Ukraine, is one of Europe's most important wetland habitats.", "For 10 points, name this river that passes through Vienna, Bratislava, Budapest, and Belgrade."], answer: "Danube River", aliases: ["Danube"] },
+      { category: "Geography", clues: ["This coastal region is extraordinarily dry because the Andes block moisture from the east and the cold offshore Humboldt Current suppresses rainfall.", "Some weather stations here have recorded years without measurable rain, while deposits of nitrates and copper have been economically important.", "For 10 points, name this desert along the Pacific coast of northern Chile and southern Peru."], answer: "Atacama Desert", aliases: ["Atacama"] },
+      { category: "Geography", clues: ["This lake occupies a rift valley in southern Siberia and is surrounded by mountains and taiga.", "It contains roughly one-fifth of the world's unfrozen surface freshwater and is the world's deepest lake.", "For 10 points, name this lake in Russia whose name begins with B."], answer: "Lake Baikal", aliases: ["Baikal"] },
+      { category: "Geography", clues: ["This narrow waterway connects the Atlantic Ocean to the Mediterranean Sea and separates Europe from Africa.", "Its northern shore includes Spain and the British territory of Gibraltar, while Morocco lies to its south.", "For 10 points, name this strait at the entrance to the Mediterranean."], answer: "Strait of Gibraltar", aliases: ["Gibraltar"] },
+      { category: "Geography", clues: ["This broad zone follows the margins of the Pacific Ocean, where subduction produces frequent earthquakes and volcanic activity.", "It arcs past the Andes, Aleutian Islands, Japan, the Philippines, and New Zealand.", "For 10 points, name this volcanic belt commonly called the Pacific what?"], answer: "Ring of Fire", aliases: ["Pacific Ring of Fire"] },
+      { category: "Fine Arts", clues: ["This self-taught French painter created dreamlike scenes with simplified forms, flat areas of color, and carefully rendered foliage despite having little formal art training.", "A customs official by profession, he depicted exotic jungles that he had encountered mainly through visits to botanical gardens and illustrated books.", "For 10 points, name this painter of The Sleeping Gypsy and The Dream."], answer: "Henri Rousseau" },
+      { category: "Fine Arts", clues: ["This composer wrote 33 piano sonatas, including a sonata dedicated to Count Waldstein and a set of variations on a waltz by Anton Diabelli.", "His career bridged the Classical and Romantic eras; despite progressive hearing loss, he continued composing monumental works late in life.", "For 10 points, name this German composer of the Ninth Symphony and the Moonlight Sonata."], answer: "Ludwig van Beethoven", aliases: ["Ludwig", "Beethoven"] },
+      { category: "Fine Arts", clues: ["In this painting, a young woman turns her head toward the viewer while wearing a blue-and-gold turban and a large pearl earring.", "The Dutch artist who created it is also known for interior scenes such as The Milkmaid.", "For 10 points, name this painting by Johannes Vermeer."], answer: "Girl with a Pearl Earring", aliases: ["Pearl Earring"] },
+      { category: "Fine Arts", clues: ["This ballet's 1913 premiere in Paris caused a famously turbulent audience reaction, in part because of its dissonant music and angular choreography.", "Its score by Igor Stravinsky accompanies a ritual in which a young woman dances herself to death to welcome spring.", "For 10 points, name this ballet whose title refers to a season's beginning."], answer: "The Rite of Spring", aliases: ["Rite of Spring"] },
+      { category: "Fine Arts", clues: ["This German school of art and design combined crafts with fine arts and emphasized functional forms for modern life.", "Walter Gropius founded it in 1919; its influential buildings, furniture, and typography often use simple geometric shapes.", "For 10 points, name this school whose name means 'building house' in German."], answer: "Bauhaus" },
+      { category: "Social Studies", clues: ["To calculate this broad price index, economists divide nominal gross domestic product by real gross domestic product and multiply the result by 100.", "Unlike the consumer price index, it tracks prices for all domestically produced final goods and services, with its basket changing as output changes.", "For 10 points, name this measure used to track changes in the price level of a country's GDP."], answer: "GDP deflator", aliases: ["GDP price deflator"] },
+      { category: "Social Studies", clues: ["When a decision is made, this concept measures the value of the next-best alternative that must be given up.", "It is central to economic reasoning about trade-offs, scarcity, and how people allocate limited resources.", "For 10 points, name this cost of a foregone alternative."], answer: "Opportunity cost" },
+      { category: "Social Studies", clues: ["In this system, governing authority is divided between a national government and regional governments, each with powers of its own.", "The United States Constitution establishes this arrangement between the federal government and the states.", "For 10 points, name this system of shared sovereignty."], answer: "Federalism" },
+      { category: "Social Studies", clues: ["This constitutional principle gives separate branches of government ways to limit one another's power.", "Examples in the United States include the presidential veto, legislative oversight, and Senate confirmation of appointments.", "For 10 points, name this principle often paired with separation of powers."], answer: "Checks and balances", aliases: ["Checks and balance"] },
+      { category: "Social Studies", clues: ["In his political theory, people escape a violent state of nature by authorizing a sovereign power to enforce covenants and preserve civil peace.", "His 1651 work argues that a strong commonwealth is necessary to prevent society from collapsing into conflict.", "For 10 points, name this English philosopher who wrote Leviathan and described life in the state of nature as 'solitary, poor, nasty, brutish, and short.'"], answer: "Thomas Hobbes", aliases: ["Thomas", "Hobbes"] },
+      { category: "Mythology", clues: ["In this Norse mythological event, a great winter precedes a final conflict in which Odin faces the wolf Fenrir and Thor battles the serpent Jörmungandr.", "The world is destroyed by fire and flood, but it is later renewed and inhabited by surviving gods and humans.", "For 10 points, name this prophesied end of the world in Norse mythology."], answer: "Ragnarök", aliases: ["Ragnarok"] },
+      { category: "Mythology", clues: ["This Egyptian goddess searches for the pieces of her murdered husband and uses magic to restore him long enough to conceive their son.", "She is often depicted with a throne-shaped headdress and is associated with healing, protection, and kingship.", "For 10 points, name this wife of Osiris and mother of Horus."], answer: "Isis" },
+      { category: "Mythology", clues: ["This Japanese sun goddess hides in a cave after becoming angry, plunging the world into darkness.", "The other kami lure her out with a mirror and a lively celebration, and Japan's imperial family traditionally claims descent from her.", "For 10 points, name this Shinto sun deity."], answer: "Amaterasu" },
+      { category: "Mythology", clues: ["In Aztec tradition, this feathered serpent deity is associated with wind, learning, and priesthood.", "A major temple dedicated to him stands at the ancient city of Teotihuacan, and his name is shared with a deity in Toltec traditions.", "For 10 points, name this feathered serpent god whose name means 'precious serpent' in Nahuatl."], answer: "Quetzalcoatl" },
+      { category: "Mythology", clues: ["This Greek hero's mother attempts to make him invulnerable by dipping him in the River Styx, leaving one part of his body untouched.", "He kills Hector outside the walls of Troy after his companion Patroclus is killed in battle.", "For 10 points, name this Greek warrior whose vulnerable heel became proverbial."], answer: "Achilles" },
+      { category: "Mythology", clues: ["In the Popol Vuh, these twin heroes descend to the underworld of Xibalba and outwit its rulers through a series of trials.", "Their story includes a ball game and the use of death and rebirth to defeat the lords of the underworld.", "For 10 points, name these Maya hero twins, whose names include Hunahpu."], answer: "Hunahpu and Xbalanque", aliases: ["Hero Twins", "Maya Hero Twins", "Hunahpu and Xbalanque"] },
+      { category: "Mythology", clues: ["This Norse god sacrifices one of his eyes to gain wisdom and hangs on the world tree Yggdrasil to learn the runes.", "He rules from Asgard, keeps the ravens Huginn and Muninn, and is fated to fight Fenrir at Ragnarök.", "For 10 points, name this chief god of the Norse pantheon."], answer: "Odin" },
+      { category: "Niche", clues: ["In this sport, players slide heavy granite stones across ice toward a circular target called the house.", "Teammates sweep the ice in front of a moving stone to influence its speed and direction.", "For 10 points, name this winter sport often nicknamed 'chess on ice.'"], answer: "Curling" },
+      { category: "Niche", clues: ["This instrument produces sound when a performer moves their hands near two antennas, without physically touching the instrument.", "Invented by Lev Termen, it is often associated with eerie gliding pitches in science-fiction film scores.", "For 10 points, name this electronic instrument named for its inventor."], answer: "Theremin" },
+      { category: "Niche", clues: ["This musical form typically presents a main subject in one voice, then imitates it in other voices according to rules of counterpoint.", "Johann Sebastian Bach's The Art of the Fugue is a famous exploration of this form.", "For 10 points, name this contrapuntal composition built from imitative voices."], answer: "Fugue" },
+      { category: "Niche", clues: ["This technology encodes information in a two-dimensional pattern of black and white squares that can be read by a camera.", "Its name abbreviates 'Quick Response,' and it is widely used to link physical objects to online information.", "For 10 points, name this kind of scannable matrix barcode."], answer: "QR code", aliases: ["QR"] },
+      { category: "Niche", clues: ["This network design technique divides data into small units that can travel independently across a network and be reassembled at their destination.", "It allows different packets from the same message to take different routes, and it underlies the architecture of the internet.", "For 10 points, name this method of data transmission."], answer: "Packet switching", aliases: ["Packet-switched networking"] },
+      { category: "Niche", clues: ["In this sport, competitors use their feet, knees, chest, and head to send a woven ball over a net, but may not use their hands.", "Popular in Southeast Asia, it is sometimes called kick volleyball.", "For 10 points, name this sport whose name combines Malay words for 'kick' and 'ball.'"], answer: "Sepak takraw", aliases: ["Sepak takraw"] },
+      { category: "Niche", clues: ["This Japanese woodblock-printing method uses multiple carved blocks, often one for each color, to produce a single image.", "Hokusai's Thirty-six Views of Mount Fuji, including The Great Wave off Kanagawa, was made using this technique.", "For 10 points, name this form of Japanese colored woodblock print."], answer: "Nishiki-e", aliases: ["Nishiki e", "Japanese woodblock print"] },
+      { category: "Niche", clues: ["This branch of biology studies fungi, including their classification, genetics, and ecological roles.", "Its subjects include yeasts, molds, mushrooms, and organisms that form lichens with algae or cyanobacteria.", "For 10 points, name this scientific field devoted to fungi."], answer: "Mycology" }
+    ];
+
+    const elements = {
+      category: document.querySelector("#category-select"),
+      categoryPill: document.querySelector("#category-pill"),
+      clueCount: document.querySelector("#clue-count"),
+      clueList: document.querySelector("#clue-list"),
+      answerBox: document.querySelector("#answer-box"),
+      roundLabel: document.querySelector("#round-label"),
+      statusDot: document.querySelector("#status-dot"),
+      statusText: document.querySelector("#status-text"),
+      start: document.querySelector("#start-button"),
+      buzz: document.querySelector("#buzz-button"),
+      answerForm: document.querySelector("#answer-form"),
+      answerInput: document.querySelector("#answer-input"),
+      skip: document.querySelector("#skip-button"),
+      score: document.querySelector("#score"),
+      accuracy: document.querySelector("#accuracy"),
+      correctCount: document.querySelector("#correct-count"),
+      playedCount: document.querySelector("#played-count")
+    };
+
+    let activeQuestion = null;
+    let questionWords = [];
+    let revealedWords = 0;
+    let buzzes = [];
+    let questionComplete = false;
+    let revealTimer = null;
+    let state = "idle";
+    let playedIds = new Set();
+    let score = 0;
+    let correctCount = 0;
+    let playedCount = 0;
+    let questionNumber = 0;
+
+    const categories = [...new Set(questions.map((question) => question.category))].sort();
+    for (const category of categories) {
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      elements.category.append(option);
+    }
+
+    function setStatus(message, tone = "") {
+      elements.statusText.textContent = message;
+      elements.statusDot.className = `status-dot${tone ? ` ${tone}` : ""}`;
+    }
+
+    function renderQuestion() {
+      elements.clueList.replaceChildren();
+      if (revealedWords === 0) {
+        const placeholder = document.createElement("div");
+        placeholder.className = "placeholder";
+        placeholder.textContent = "Get ready. The opening detail is waiting.";
+        elements.clueList.append(placeholder);
+      } else {
+        const line = document.createElement("div");
+        line.className = "clue";
+        appendBuzzMarkers(line, 0);
+        for (let index = 0; index < revealedWords; index += 1) {
+          if (index > 0) line.append(document.createTextNode(" "));
+          const word = document.createElement("span");
+          word.textContent = questionWords[index];
+          if (index === revealedWords - 1) word.className = "new-word";
+          line.append(word);
+          appendBuzzMarkers(line, index + 1);
+        }
+        elements.clueList.append(line);
+      }
+      elements.clueCount.textContent = revealedWords === 0
+        ? "Read-aloud toss-up"
+        : `${revealedWords} of ${questionWords.length} words`;
+    }
+
+    function appendBuzzMarkers(line, wordIndex) {
+      buzzes.forEach((buzz, index) => {
+        if (buzz.wordIndex !== wordIndex) return;
+        const marker = document.createElement("span");
+        marker.className = `buzz-marker${buzz.result ? ` ${buzz.result}` : ""}`;
+        marker.textContent = "⚡";
+        const result = buzz.result === "correct" ? "correct" : buzz.result === "missed" ? "missed" : buzz.result === "skipped" ? "skipped" : "awaiting answer";
+        marker.title = `Buzz ${index + 1}: ${result}, after word ${wordIndex}`;
+        marker.setAttribute("aria-label", `Buzz ${index + 1} ${result} after word ${wordIndex}`);
+        line.append(marker);
+      });
+    }
+
+    function updateControls() {
+      elements.start.hidden = state !== "idle" && state !== "answered";
+      elements.start.textContent = state === "answered" ? "Next toss-up" : "Start toss-up";
+      elements.buzz.hidden = state !== "reading" && state !== "complete";
+      elements.buzz.disabled = state !== "reading" && state !== "complete";
+      elements.answerForm.hidden = state !== "buzzed";
+      elements.skip.hidden = state === "idle" || state === "answered";
+    }
+
+    function startQuestion() {
+      const selectedCategory = elements.category.value;
+      let candidates = questions.filter((question) => selectedCategory === "All" || question.category === selectedCategory);
+      if (candidates.length === 0) return;
+      if (candidates.length > 1 && candidates.every((question) => playedIds.has(question))) playedIds.clear();
+      const unseen = candidates.filter((question) => !playedIds.has(question));
+      if (unseen.length === 0) {
+        playedIds.clear();
+        candidates = questions.filter((question) => selectedCategory === "All" || question.category === selectedCategory);
+      } else {
+        candidates = unseen;
+      }
+      activeQuestion = candidates[Math.floor(Math.random() * candidates.length)];
+      playedIds.add(activeQuestion);
+      questionNumber += 1;
+      questionWords = activeQuestion.clues.join(" ").match(/\S+/g) || [];
+      revealedWords = 0;
+      buzzes = [];
+      questionComplete = false;
+      clearTimeout(revealTimer);
+      state = "reading";
+      elements.roundLabel.textContent = `Toss-up ${questionNumber}`;
+      elements.categoryPill.textContent = activeQuestion.category;
+      elements.answerBox.hidden = true;
+      elements.answerBox.replaceChildren();
+      elements.answerInput.value = "";
+      elements.answerBox.hidden = true;
+      elements.answerBox.replaceChildren();
+      revealNextWord();
+      updateControls();
+      setStatus("The question is being read. Buzz when you know the answer.", "ready");
+    }
+
+    function revealNextWord() {
+      if (state !== "reading") return;
+      if (revealedWords >= questionWords.length) {
+        questionComplete = true;
+        state = "complete";
+        updateControls();
+        setStatus("The whole toss-up is on screen. Buzz in or reveal the answer.", "ready");
+        return;
+      }
+
+      const word = questionWords[revealedWords];
+      revealedWords += 1;
+      renderQuestion();
+      if (revealedWords >= questionWords.length) {
+        questionComplete = true;
+        state = "complete";
+        updateControls();
+        setStatus("The whole toss-up is on screen. Buzz in or reveal the answer.", "ready");
+        return;
+      }
+
+      const delay = /[.!?]["')\]]?$/.test(word) ? 520 : /[,;:]$/.test(word) ? 300 : 180;
+      revealTimer = setTimeout(revealNextWord, delay);
+    }
+
+    function buzzIn() {
+      if (state !== "reading" && state !== "complete") return;
+      clearTimeout(revealTimer);
+      buzzes.push({ wordIndex: revealedWords, result: "" });
+      state = "buzzed";
+      renderQuestion();
+      updateControls();
+      elements.answerInput.value = "";
+      elements.answerInput.focus();
+      setStatus("Buzz! Type your answer and submit it.", "buzzed");
+    }
+
+    function normalizeAnswer(answer) {
+      return answer.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/^[\s"'`]+|[\s"'`.,!?;:]+$/g, "")
+        .replace(/^(the|a|an)\s+/, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    }
+
+    function showAnswer() {
+      const box = document.createElement("div");
+      box.className = "answer-box";
+      const label = document.createElement("div");
+      label.className = "answer-label";
+      label.textContent = "Answer";
+      const text = document.createElement("div");
+      text.className = "answer-text";
+      text.textContent = activeQuestion.answer;
+      box.append(label, text);
+      elements.answerBox.replaceChildren(box);
+      elements.answerBox.hidden = false;
+    }
+
+    function finishRound(wasCorrect, revealAnswer = true) {
+      clearTimeout(revealTimer);
+      questionComplete = true;
+      if (revealAnswer) {
+        revealedWords = questionWords.length;
+        renderQuestion();
+        showAnswer();
+      }
+      playedCount += 1;
+      if (wasCorrect) {
+        correctCount += 1;
+        score += 10;
+      }
+      elements.score.textContent = String(score);
+      elements.correctCount.textContent = String(correctCount);
+      elements.playedCount.textContent = String(playedCount);
+      elements.accuracy.textContent = `${Math.round((correctCount / playedCount) * 100)}%`;
+      state = "answered";
+      updateControls();
+      setStatus(wasCorrect ? "Correct! The full toss-up is shown. You earned 10 points." : "The toss-up is complete. The answer is shown above.", wasCorrect ? "done" : "");
+    }
+
+    function submitAnswer(event) {
+      event.preventDefault();
+      if (state !== "buzzed" || !activeQuestion) return;
+      const acceptedAnswers = [activeQuestion.answer, ...(activeQuestion.aliases || [])];
+      const guess = normalizeAnswer(elements.answerInput.value);
+      const isCorrect = acceptedAnswers.some((answer) => normalizeAnswer(answer) === guess);
+      const currentBuzz = buzzes[buzzes.length - 1];
+      currentBuzz.result = isCorrect ? "correct" : "missed";
+      renderQuestion();
+      if (isCorrect) {
+        finishRound(true);
+      } else if (questionComplete) {
+        finishRound(false);
+      } else {
+        state = "reading";
+        elements.answerForm.reset();
+        updateControls();
+        setStatus("Not quite. The question is continuing from where you buzzed.", "ready");
+        revealTimer = setTimeout(revealNextWord, 350);
+      }
+    }
+
+    function skipQuestion() {
+      if (!["reading", "buzzed", "complete"].includes(state)) return;
+      const currentBuzz = buzzes[buzzes.length - 1];
+      if (state === "buzzed" && currentBuzz && !currentBuzz.result) {
+        currentBuzz.result = "skipped";
+        renderQuestion();
+      }
+      finishRound(false);
+      setStatus("Skipped. The full toss-up and answer are shown; no points awarded.");
+    }
+
+    function resetScore() {
+      clearTimeout(revealTimer);
+      score = 0;
+      correctCount = 0;
+      playedCount = 0;
+      questionNumber = 0;
+      playedIds.clear();
+      elements.score.textContent = "0";
+      elements.correctCount.textContent = "0";
+      elements.playedCount.textContent = "0";
+      elements.accuracy.textContent = "—";
+      activeQuestion = null;
+      questionWords = [];
+      revealedWords = 0;
+      buzzes = [];
+      questionComplete = false;
+      state = "idle";
+      elements.categoryPill.textContent = "Mixed subjects";
+      elements.clueCount.textContent = "Read-aloud toss-up";
+      elements.clueList.innerHTML = '<div class="placeholder">The question appears word by word, at a live reader’s pace. Buzz at any time and type your answer to check it. Press “Start toss-up” when you’re ready.</div>';
+      elements.answerBox.hidden = true;
+      elements.answerForm.reset();
+      elements.roundLabel.textContent = "Ready when you are";
+      updateControls();
+      setStatus("Score reset. Choose a category and start a round.");
+    }
+
+    elements.start.addEventListener("click", startQuestion);
+    elements.buzz.addEventListener("click", buzzIn);
+    elements.answerForm.addEventListener("submit", submitAnswer);
+    elements.skip.addEventListener("click", skipQuestion);
+    document.querySelector("#reset-button").addEventListener("click", resetScore);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName))) return;
+      if (event.code === "Space") {
+        event.preventDefault();
+        buzzIn();
+      } else if (event.key.toLowerCase() === "n") {
+        if (state === "idle" || state === "answered") startQuestion();
+      }
+    });
+
+    updateControls();
+  </script>
+</body>
+</html>
